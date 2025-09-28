@@ -4,6 +4,7 @@ using DocumentMiddleware.Core.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using DocumentMiddleware.Core.Constants;
 
 namespace DocumentMiddleware.Api.EndpointsHandlers;
 public static class AntiqueHandlers
@@ -41,7 +42,7 @@ public static class AntiqueHandlers
     
     
     
-    public static async Task<Results<Ok<AntiqueForResponseDto>,BadRequest<string>, UnprocessableEntity<string>,StatusCodeHttpResult>> CreateAntiqueAsync(
+    public static async Task<Results<CreatedAtRoute<AntiqueForResponseDto>,BadRequest<string>, UnprocessableEntity<string>,StatusCodeHttpResult>> CreateAntiqueAsync(
         DocumentDbContext documentDbContext,
         IMapper mapper,
         [FromForm] AntiqueForCreationDto antiqueToCreate,
@@ -58,8 +59,9 @@ public static class AntiqueHandlers
                 logger.LogError("No ImageFiles received in request.");
                 return TypedResults.BadRequest("ImageFiles must be provided.");
             }
+
             int count = 1;
-            foreach(IFormFile image in antiqueToCreate.ImageFiles)
+            foreach (IFormFile image in antiqueToCreate.ImageFiles)
             {
                 logger.LogInformation("Uploading Image {Count} of {TotalImageCount}...",
                     count,
@@ -68,6 +70,7 @@ public static class AntiqueHandlers
                 {
                     return TypedResults.UnprocessableEntity("File size should not exceed 5 MB");
                 }
+
                 string[] allowedFileExtensions = [".jpg", ".jpeg", ".png"];
                 string createdImageName = await fileService.UploadFileAsync(
                     imageFile: image,
@@ -76,30 +79,25 @@ public static class AntiqueHandlers
                 logger.LogInformation("Upload successful.");
                 count++;
             }
-            
-            var antiqueEntity = mapper.Map<Antique>(antiqueToCreate, opt =>
-            {
-                opt.Items["FileNames"] = uploadedFiles;
-            });
+
+            var antiqueEntity =
+                mapper.Map<Antique>(antiqueToCreate, opt => { opt.Items["FileNames"] = uploadedFiles; });
             antiqueEntity.Thumbnail = uploadedFiles.FirstOrDefault();
-            antiqueEntity.CreatedAt = antiqueEntity.UpdatedAt = DateTime.Now.ToUniversalTime();
+            antiqueEntity.CreatedAt = antiqueEntity.UpdatedAt = DateTimeOffset.UtcNow;
             antiqueEntity.Version = 1;
-    
+
             var antiqueToReturn = mapper.Map<AntiqueForResponseDto>(antiqueEntity);
-        
+
             documentDbContext.Antiques.Add(antiqueEntity);
             await documentDbContext.SaveChangesAsync();
-    
-            // Need to add a valid routeName and routeValues
-            //return TypedResults.CreatedAtRoute(
-            //    antiqueToReturn,
-            //    null,
-            //    null
-            //);
-            
+
             logger.LogInformation("Antique creation succeeded.");
-            
-            return TypedResults.Ok(antiqueToReturn); // TEMPORARY
+
+            return TypedResults.CreatedAtRoute(
+                antiqueToReturn,
+                Routes.GET_ANTIQUE_BY_ID,
+                new { antiqueId = antiqueEntity.Id }
+        );
         }
         catch (Exception ex)
         {
@@ -110,12 +108,74 @@ public static class AntiqueHandlers
         }
     }
 
-    
-    // public static async Task UpdateAntiqueAsync(bool)
-    // {
-    //     DocumentDbContext documentDbContext,
-    //         IMapper mapper,
-    //     [FromForm] AntiqueForCreationDto antiqueToCreate,
-    //     ILogger<Antique> logger,
-    // }
+    public static async Task<Results<Ok<AntiqueForResponseDto>,NotFound<string>>> GetAntiqueByIdAsync(
+        DocumentDbContext documentDbContext,
+        IMapper mapper,
+        int antiqueId,
+        ILogger<Antique> logger
+    )
+    {
+        logger.LogInformation("GET /antiques/{ID} received.",
+            antiqueId
+            );
+        
+        var antiqueEntity = mapper.Map<AntiqueForResponseDto>(
+            await documentDbContext.Antiques
+            .Where(a => a.Id == antiqueId)
+            .FirstOrDefaultAsync()
+            );
+
+        if (antiqueEntity == null)
+            return TypedResults.NotFound<string>(
+                String.Concat("Unable to retrieve antique with ID: ",
+                antiqueId));
+        return TypedResults.Ok<AntiqueForResponseDto>(antiqueEntity);
+    }
+
+    public static async Task<Results<Ok<AntiqueForResponseDto>, UnprocessableEntity, NotFound<string>>> UpdateAntiqueAsync(
+        DocumentDbContext documentDbContext,
+        IMapper mapper,
+        int antiqueId,
+        AntiqueForUpdateDto updatedAntiqueDto,
+        ILogger<Antique> logger
+    )
+    {
+        logger.LogInformation("PATCH /antiques/{ID} request received.",
+            antiqueId);
+        var existingAntiqueEntity = await documentDbContext.Antiques
+            .Where(a => a.Id == antiqueId)
+            .FirstOrDefaultAsync();
+        
+        if(existingAntiqueEntity == null)
+            return TypedResults.NotFound<string>(
+                String.Concat("Unable to retrieve antique with ID: ",
+                    antiqueId));
+
+        try
+        {
+            if (updatedAntiqueDto.Name != null)
+                existingAntiqueEntity.Name = updatedAntiqueDto.Name;
+            if (updatedAntiqueDto.Status != null)
+                existingAntiqueEntity.Status = updatedAntiqueDto.Status.Value;
+            if (updatedAntiqueDto.Price != null)
+                existingAntiqueEntity.Price = updatedAntiqueDto.Price.Value;
+            if (updatedAntiqueDto.ThumbnailFile != null)
+                existingAntiqueEntity.Thumbnail = updatedAntiqueDto.ThumbnailFile;
+
+            existingAntiqueEntity.UpdatedAt = DateTimeOffset.UtcNow;
+            existingAntiqueEntity.Version += 1;
+            
+            await documentDbContext.SaveChangesAsync();
+        }
+        catch(Exception ex)
+        {
+            logger.LogError("Update failed. {Message}",
+                ex.Message);
+            return TypedResults.UnprocessableEntity();
+        }
+
+        return TypedResults.Ok<AntiqueForResponseDto>(
+            mapper.Map<AntiqueForResponseDto>(existingAntiqueEntity)
+            );
+    }
 }

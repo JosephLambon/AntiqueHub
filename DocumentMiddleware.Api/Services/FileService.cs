@@ -22,7 +22,7 @@ public class FileService(IWebHostEnvironment environment, ILogger<Antique> logge
 
         // Needs updating to automatically configure local/remote setup
         logger.LogInformation("Connecting to storage container...");
-        // BlobServiceClient blobServiceClient = BlobStorageService.GetBlobContainerClient(Constants.BlobStorage.STORAGE_ACCOUNT_NAME);
+        // BlobServiceClient blobServiceClient = BlobStorageService.GetBlobContainerClient(Routes.BlobStorage.STORAGE_ACCOUNT_NAME);
         BlobContainerClient blobContainerClient = BlobStorageService.GetBlobContainerClientLocal();
         
         var fileName = $"{Guid.NewGuid().ToString()}{ext}";

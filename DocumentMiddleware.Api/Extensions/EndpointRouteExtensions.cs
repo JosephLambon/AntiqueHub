@@ -1,4 +1,5 @@
 ﻿using DocumentMiddleware.Api.EndpointsHandlers;
+using DocumentMiddleware.Core.Constants;
 
 namespace DocumentMiddleware.Api.Extensions
 {
@@ -16,7 +17,13 @@ namespace DocumentMiddleware.Api.Extensions
             imageEndpoints.MapPost("", AntiqueHandlers.CreateAntiqueAsync)
                 .WithSummary("Add new antique")
                 .DisableAntiforgery();
-
+            
+            imageEndpoints.MapGet("/{antiqueId}", AntiqueHandlers.GetAntiqueByIdAsync)
+                .WithName(Routes.GET_ANTIQUE_BY_ID)
+                .WithSummary("Retrieve an antique by its ID");
+            
+            imageEndpoints.MapPatch("/{antiqueId}", AntiqueHandlers.UpdateAntiqueAsync) 
+                .WithSummary("Update an antique entity by ID");
         }
     }
 }
