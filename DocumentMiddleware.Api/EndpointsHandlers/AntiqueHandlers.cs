@@ -12,9 +12,9 @@ public static class AntiqueHandlers
         DocumentDbContext documentDbContext,
         IMapper mapper,
         ILogger<Antique> logger,
-        bool includeAvailable = true,
-        bool includeSold = false,
-        bool includeArchived = false
+        [FromQuery] bool includeAvailable = true,
+        [FromQuery] bool includeSold = false,
+        [FromQuery] bool includeArchived = false
     ){
         logger.LogInformation("GET /antiques request received. Include available={IncludeAvailable}; Include sold={IncludeSold} ; Include archived={IncludeArchived}",
             includeAvailable,

@@ -10,6 +10,9 @@ namespace DocumentMiddleware.Api.Extensions
                 .WithOpenApi()
                 .WithTags("Antique endpoints");
 
+            imageEndpoints.MapGet("", AntiqueHandlers.GetAntiquesAsync)
+                .WithSummary("Retrieve antiques based on their status");
+            
             imageEndpoints.MapPost("", AntiqueHandlers.CreateAntiqueAsync)
                 .WithSummary("Add new antique")
                 .DisableAntiforgery();
