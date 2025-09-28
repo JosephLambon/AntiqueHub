@@ -14,9 +14,15 @@ public class AntiqueForCreationDto
     public string? Name { get; set; }
 
     public Status? Status { get; set; }
+    public decimal? Price { get; set; }
+    public IFormFileCollection? ImageFiles { get; set; }
+}
 
+public class AntiqueForUpdateDto
+{
+    public string? Name { get; set; }
+
+    public Status? Status { get; set; }
     public IFormFile? ThumbnailFile { get; set; }
-
     public IFormFile[]? ImageFiles { get; set; } = null;
-
 }
