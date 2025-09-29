@@ -27,11 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Uploads\" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\DocumentMiddleware.Core\DocumentMiddleware.Core.csproj" />
+      <ProjectReference Include="..\AntiqueHub.Core\AntiqueHub.Core.csproj" />
     </ItemGroup>
 
 </Project>

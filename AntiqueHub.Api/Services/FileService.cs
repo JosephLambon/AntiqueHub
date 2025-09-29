@@ -2,10 +2,10 @@ using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
-using DocumentMiddleware.Api.Services;
+using AntiqueHub.Api.Services;
 using DocumentMiddleware.Core.Models;
 
-namespace DocumentMiddleware.Api.Services;
+namespace AntiqueHub.Api.Services;
 public class FileService(IWebHostEnvironment environment, ILogger<Antique> logger) : IFileService
 {
     public async Task<string> UploadFileAsync(

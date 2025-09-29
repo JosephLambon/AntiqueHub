@@ -2,7 +2,7 @@ using DocumentMiddleware.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations.Internal;
 
-namespace DocumentMiddleware.Api.Extensions;
+namespace AntiqueHub.Api.Extensions;
 
 public static class DbContextExtensions
 {

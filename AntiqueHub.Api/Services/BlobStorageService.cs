@@ -2,7 +2,7 @@
 using Azure.Storage;
 using Azure.Storage.Blobs;
 
-namespace DocumentMiddleware.Api.Services
+namespace AntiqueHub.Api.Services
 {
     public static class BlobStorageService
     {

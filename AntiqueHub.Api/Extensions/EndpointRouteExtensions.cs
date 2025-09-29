@@ -1,7 +1,7 @@
-﻿using DocumentMiddleware.Api.EndpointsHandlers;
+﻿using AntiqueHub.Api.EndpointsHandlers;
 using DocumentMiddleware.Core.Constants;
 
-namespace DocumentMiddleware.Api.Extensions
+namespace AntiqueHub.Api.Extensions
 {
     public static class EndpointRouteExtensions
     {

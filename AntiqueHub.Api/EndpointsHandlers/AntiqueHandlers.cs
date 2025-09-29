@@ -1,12 +1,12 @@
+using AntiqueHub.Api.Services;
 using AutoMapper;
-using DocumentMiddleware.Api.Services;
 using DocumentMiddleware.Core.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DocumentMiddleware.Core.Constants;
 
-namespace DocumentMiddleware.Api.EndpointsHandlers;
+namespace AntiqueHub.Api.EndpointsHandlers;
 public static class AntiqueHandlers
 {
     public static async Task<Ok<IEnumerable<AntiqueForResponseDto>>> GetAntiquesAsync(
@@ -155,6 +155,8 @@ public static class AntiqueHandlers
         {
             if (updatedAntiqueDto.Name != null)
                 existingAntiqueEntity.Name = updatedAntiqueDto.Name;
+            if (updatedAntiqueDto.Description != null)
+                existingAntiqueEntity.Description = updatedAntiqueDto.Description;
             if (updatedAntiqueDto.Status != null)
                 existingAntiqueEntity.Status = updatedAntiqueDto.Status.Value;
             if (updatedAntiqueDto.Price != null)

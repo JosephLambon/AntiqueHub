@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Http.Json;
 using DocumentMiddleware.Core.Models;
-using DocumentMiddleware.Api.Services;
 using System.Text.Json.Serialization;
+using AntiqueHub.Api.Services;
 
-namespace DocumentMiddleware.Api.Extensions;
+namespace AntiqueHub.Api.Extensions;
 public static class ServiceExtensions
 {
     public static IServiceCollection RegisterServices(this IServiceCollection services)

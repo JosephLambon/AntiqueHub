@@ -1,7 +1,7 @@
 using AutoMapper;
 using DocumentMiddleware.Core.Models;
 
-namespace DocumentMiddleware.Api.Profiles;
+namespace AntiqueHub.Api.Profiles;
 
 public class AntiqueProfile : Profile
 {

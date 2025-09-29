@@ -22,7 +22,7 @@ namespace DocumentMiddleware.Core.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("DocumentMiddleware.Core.Models.Antique", b =>
+            modelBuilder.Entity("AntiqueHub.Core.Models.Antique", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -30,8 +30,12 @@ namespace DocumentMiddleware.Core.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string[]>("Images")
                         .HasColumnType("text[]");
@@ -49,7 +53,7 @@ namespace DocumentMiddleware.Core.Migrations
                     b.Property<string>("Thumbnail")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Version")

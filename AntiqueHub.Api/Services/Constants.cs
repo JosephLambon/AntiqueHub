@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace DocumentMiddleware.Api.Services
+namespace AntiqueHub.Api.Services
 {
     public class Constants
     {
