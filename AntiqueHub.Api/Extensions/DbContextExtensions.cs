@@ -1,4 +1,4 @@
-using DocumentMiddleware.Core.Models;
+    using AntiqueHub.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations.Internal;
 
@@ -8,7 +8,7 @@ public static class DbContextExtensions
 {
     public static IServiceCollection AddDbContext(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<DocumentDbContext>(options =>
+        services.AddDbContext<AntiqueDbContext>(options =>
         {
             options.UseNpgsql(configuration.GetConnectionString("default"));
         });

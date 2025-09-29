@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 
-namespace DocumentMiddleware.Core.Models;
+namespace AntiqueHub.Core.Models;
 public class AntiqueForResponseDto
 {
     public string? Name { get; set; }

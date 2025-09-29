@@ -1,4 +1,4 @@
-namespace DocumentMiddleware.Core.Constants;
+namespace AntiqueHub.Core.Constants;
 
 public static class Routes
 {

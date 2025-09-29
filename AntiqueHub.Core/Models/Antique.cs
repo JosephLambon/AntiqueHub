@@ -1,4 +1,4 @@
-namespace DocumentMiddleware.Core.Models;
+namespace AntiqueHub.Core.Models;
 
 public enum Status
 {

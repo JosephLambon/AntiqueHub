@@ -3,7 +3,7 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
 using AntiqueHub.Api.Services;
-using DocumentMiddleware.Core.Models;
+using AntiqueHub.Core.Models;
 
 namespace AntiqueHub.Api.Services;
 public class FileService(IWebHostEnvironment environment, ILogger<Antique> logger) : IFileService

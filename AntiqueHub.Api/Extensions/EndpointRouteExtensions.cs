@@ -1,5 +1,5 @@
 ﻿using AntiqueHub.Api.EndpointsHandlers;
-using DocumentMiddleware.Core.Constants;
+using AntiqueHub.Core.Constants;
 
 namespace AntiqueHub.Api.Extensions
 {

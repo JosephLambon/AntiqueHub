@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Http.Json;
-using DocumentMiddleware.Core.Models;
+using AntiqueHub.Core.Models;
 using System.Text.Json.Serialization;
 using AntiqueHub.Api.Services;
 
@@ -8,8 +8,7 @@ public static class ServiceExtensions
 {
     public static IServiceCollection RegisterServices(this IServiceCollection services)
     {
-        services.AddTransient<DocumentDbContext>();
-        // services.AddTransient<IProductRepository, ProductRepository>();
+        services.AddTransient<AntiqueDbContext>();
         services.AddTransient<IFileService, FileService>();
         services.AddCors(options =>
         {

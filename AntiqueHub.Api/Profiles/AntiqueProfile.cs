@@ -1,5 +1,5 @@
 using AutoMapper;
-using DocumentMiddleware.Core.Models;
+using AntiqueHub.Core.Models;
 
 namespace AntiqueHub.Api.Profiles;
 

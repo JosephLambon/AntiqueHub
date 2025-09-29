@@ -1,7 +1,4 @@
-CRUD operations guide: https://ravindradevrani.medium.com/image-upload-crud-operations-in-net-core-apis-7407f111d2f4
-PostgreSQL with Docker: https://www.datacamp.com/tutorial/postgresql-docker?dc_referrer=https%3A%2F%2Fwww.google.com%2F
-
-
-1. Setup table storage connection, rather than filestream to local folder
-2. Create Docker image for PostgreSQL & Azure Storage Account locally??
+1. Create Infrastructure project, configure local/remote runs accordingly w connection strings
+2. Create Services project. Increase performance of upload with just one connection to azure? 
 3. Understand & configure antiforgery on form-data requests.
+4. Write unit tests!
