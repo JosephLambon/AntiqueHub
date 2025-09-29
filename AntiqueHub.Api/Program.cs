@@ -1,0 +1,35 @@
+using Microsoft.Extensions.FileProviders;
+using AntiqueHub.Api.Extensions;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// MOVE THESE INTO EXTENSIONS
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-CSRF-TOKEN";
+});
+
+
+builder.Services
+    .AddDbContext(builder.Configuration)
+    .RegisterServices();
+
+var app = builder.Build();
+
+app.UseCors();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+// app.UseAuth() lines go HERE!!!
+
+app.UseAntiforgery();
+app.RegisterAntiqueEndpoints();
+
+app.Run();
