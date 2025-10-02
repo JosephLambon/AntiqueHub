@@ -1,12 +1,8 @@
-using Azure.Identity;
 using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
-using Azure.Storage.Blobs.Specialized;
-using AntiqueHub.Api.Services;
 using AntiqueHub.Core.Models;
 
 namespace AntiqueHub.Api.Services;
-public class FileService(IWebHostEnvironment environment, ILogger<Antique> logger) : IFileService
+public class FileService(ILogger<Antique> logger) : IFileService
 {
     public async Task<string> UploadFileAsync(
         IFormFile? imageFile,
@@ -28,7 +24,7 @@ public class FileService(IWebHostEnvironment environment, ILogger<Antique> logge
         var fileName = $"{Guid.NewGuid().ToString()}{ext}";
 
         BlobClient blobClient = blobContainerClient.GetBlobClient(fileName); // Create a new blob for image file
-        
+
         await using (var stream = imageFile.OpenReadStream())
         {
             logger.LogInformation("Uploading blob...");

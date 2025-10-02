@@ -9,9 +9,8 @@ using AntiqueHub.Api.EndpointsHandlers;
 using AntiqueHub.Api.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
-using Xunit;
 
-namespace AntiqueHub.Tests
+namespace AntiqueHub.Api.Tests.EndpointHandlers
 {
     public class GetAntiquesAsyncTests
     {
@@ -30,6 +29,10 @@ namespace AntiqueHub.Tests
             mockMapper = config.CreateMapper();
             mockLogger = new Mock<ILogger<Antique>>();
             mockFileService = new Mock<IFileService>();
+            
+            mockFileService
+                .Setup(s => s.UploadFileAsync(It.IsAny<IFormFile>(), It.IsAny<string[]>()))
+                .ReturnsAsync("mocked-image.png");
         }
         
         private IFormFile CreateFakeFormFile(string fileName, long length = 1024)
@@ -43,7 +46,6 @@ namespace AntiqueHub.Tests
         {
             // Arrange
             var mockRepo = AntiqueRepositoryMock.GetAntiqueRepository();
-            var mockLogger = new Mock<ILogger<Antique>>();
         
             // Act
             var result = await AntiqueHandlers.GetAntiquesAsync(
@@ -65,7 +67,6 @@ namespace AntiqueHub.Tests
         {
             // Arrange
             var mockRepo = AntiqueRepositoryMock.GetAntiqueRepository();
-            var mockLogger = new Mock<ILogger<Antique>>();
         
             // Act
             var result = await AntiqueHandlers.GetAntiquesAsync(
@@ -87,7 +88,6 @@ namespace AntiqueHub.Tests
         {
             // Arrange
             var mockRepo = AntiqueRepositoryMock.GetAntiqueRepository();
-            var mockLogger = new Mock<ILogger<Antique>>();
         
             // Act
             var result = await AntiqueHandlers.GetAntiquesAsync(
@@ -168,7 +168,7 @@ namespace AntiqueHub.Tests
                 Status = Status.Available,
                 ImageFiles = new FormFileCollection
                 {
-                    CreateFakeFormFile("test.png")
+                    CreateFakeFormFile("mocked-image.png")
                 }
             };
             var expectedResponse = new AntiqueForResponseDto
@@ -177,8 +177,8 @@ namespace AntiqueHub.Tests
                 Description = "A test antique",
                 Price = 50.0m,
                 Status = Status.Available,
-                Images = new[] { "test.png" },
-                Thumbnail = null
+                Images = new[] { "mocked-image.png" },
+                Thumbnail = "mocked-image.png"
             };
 
             // Act
@@ -261,6 +261,8 @@ namespace AntiqueHub.Tests
         {
             // Arrange
             var mockRepo = AntiqueRepositoryMock.GetAntiqueRepository();
+            mockRepo.Setup(r => r.AddAntiqueAsync(It.IsAny<Antique>()))
+                .ThrowsAsync(new Exception("DB failure"));
             var dto = new AntiqueForCreationDto
             {
                 Name = "Fail Upload Antique",
@@ -285,6 +287,95 @@ namespace AntiqueHub.Tests
             // Assert
             Assert.IsType<StatusCodeHttpResult>(result.Result);
             Assert.Equal(500, ((StatusCodeHttpResult)result.Result).StatusCode);
+        }
+        
+        [Fact]
+        public async Task UpdateAntiqueAsync_ReturnsOk_WhenUpdateSucceeds()
+        {
+            // Arrange
+            var mockRepo = AntiqueRepositoryMock.GetAntiqueRepository();
+            var antiqueId = 1;
+            var updatedDto = new AntiqueForUpdateDto
+            {
+                Name = "Restored Vase",
+                Description = "Now looks great",
+                Price = 150.0m,
+                Status = Status.Sold,
+                ThumbnailFile = "9c6c1c92-8c88-41d9-b13d-672e9a114c5d.png"
+            };
+            var expectedResponse = new AntiqueForResponseDto
+            {
+                Name = "Restored Vase",
+                Description = "Now looks great",
+                Status = Status.Sold,
+                Price = 150.0m,
+                Thumbnail = "9c6c1c92-8c88-41d9-b13d-672e9a114c5d.png",
+                Images = new[]
+                {
+                    "3f8b1e1c-6c4f-4a4d-9e1f-8c3d82a1f5e4.jpg",
+                    "9c6c1c92-8c88-41d9-b13d-672e9a114c5d.png"
+                }
+            };
+
+            // Act
+            var result = await AntiqueHandlers.UpdateAntiqueAsync(
+                mockRepo.Object,
+                mockMapper,
+                antiqueId,
+                updatedDto,
+                mockLogger.Object
+            );
+
+            // Assert
+            var okResult = Assert.IsType<Ok<AntiqueForResponseDto>>(result.Result);
+            Assert.Equivalent(expectedResponse, okResult.Value);
+            mockRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
+        }
+        
+        [Fact]
+        public async Task UpdateAntiqueAsync_ReturnsNotFound_WhenAntiqueDoesNotExist()
+        {
+            // Arrange
+            var mockRepo = AntiqueRepositoryMock.GetAntiqueRepository();
+            var antiqueId = 99;
+            var updatedDto = new AntiqueForUpdateDto { Name = "Ghost Item" };
+
+            // Act
+            var result = await AntiqueHandlers.UpdateAntiqueAsync(
+                mockRepo.Object,
+                mockMapper,
+                antiqueId,
+                updatedDto,
+                mockLogger.Object
+            );
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFound<string>>(result.Result);
+            Assert.Equal("Unable to retrieve antique with ID: 99", notFoundResult.Value);
+        }
+
+        [Fact]
+        public async Task UpdateAntiqueAsync_ReturnsUnprocessableEntity_WhenExceptionOccurs()
+        {
+            // Arrange
+            var mockRepo = AntiqueRepositoryMock.GetAntiqueRepository();
+            var antiqueId = 2;
+            var updatedDto = new AntiqueForUpdateDto { Name = "Still Broken" };
+            // Simulate DB failure on save
+            mockRepo.Setup(r => r.SaveChangesAsync())
+                .ThrowsAsync(new Exception("DB failure"));
+
+            // Act
+            var result = await AntiqueHandlers.UpdateAntiqueAsync(
+                mockRepo.Object,
+                mockMapper,
+                antiqueId,
+                updatedDto,
+                mockLogger.Object
+            );
+
+            // Assert
+            Assert.IsType<UnprocessableEntity>(result.Result);
         }
     }
 }
