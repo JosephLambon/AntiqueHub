@@ -8,7 +8,7 @@ public static class ServiceExtensions
 {
     public static IServiceCollection RegisterServices(this IServiceCollection services)
     {
-        services.AddTransient<AntiqueDbContext>();
+        services.AddScoped<AntiqueDbContext>();
         services.AddTransient<IFileService, FileService>();
         services.AddCors(options =>
         {

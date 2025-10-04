@@ -28,8 +28,4 @@
       <ProjectReference Include="..\AntiqueHub.Core\AntiqueHub.Core.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Services\" />
-    </ItemGroup>
-
 </Project>

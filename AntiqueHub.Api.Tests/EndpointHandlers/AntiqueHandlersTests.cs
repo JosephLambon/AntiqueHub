@@ -2,6 +2,7 @@ using AutoMapper;
 using AntiqueHub.Core.Models;
 using AntiqueHub.Api.Profiles;
 using AntiqueHub.Api.Tests.Mocks;
+using AntiqueHub.Api.Tests.Helpers;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -33,12 +34,6 @@ namespace AntiqueHub.Api.Tests.EndpointHandlers
             mockFileService
                 .Setup(s => s.UploadFileAsync(It.IsAny<IFormFile>(), It.IsAny<string[]>()))
                 .ReturnsAsync("mocked-image.png");
-        }
-        
-        private IFormFile CreateFakeFormFile(string fileName, long length = 1024)
-        {
-            var stream = new MemoryStream(new byte[length]);
-            return new FormFile(stream, 0, length, "file", fileName);
         }
 
         [Fact]
@@ -168,7 +163,7 @@ namespace AntiqueHub.Api.Tests.EndpointHandlers
                 Status = Status.Available,
                 ImageFiles = new FormFileCollection
                 {
-                    CreateFakeFormFile("mocked-image.png")
+                    FormFileHelpers.CreateFormFile("mocked-image.png")
                 }
             };
             var expectedResponse = new AntiqueForResponseDto
@@ -239,7 +234,7 @@ namespace AntiqueHub.Api.Tests.EndpointHandlers
                 Status = Status.Available,
                 ImageFiles = new FormFileCollection
                 {
-                    CreateFakeFormFile("big.jpg", length: 6 * 1024 * 1024) // 6 MB
+                    FormFileHelpers.CreateFormFile("big.jpg", length: 6 * 1024 * 1024) // 6 MB
                 }
             };
 
@@ -271,7 +266,7 @@ namespace AntiqueHub.Api.Tests.EndpointHandlers
                 Status = Status.Available,
                 ImageFiles = new FormFileCollection
                 {
-                    CreateFakeFormFile("test.jpg")
+                    FormFileHelpers.CreateFormFile("test.jpg")
                 }
             };
 

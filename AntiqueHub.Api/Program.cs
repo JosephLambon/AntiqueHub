@@ -3,18 +3,16 @@ using AntiqueHub.Api.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MOVE THESE INTO EXTENSIONS
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddAntiforgery(options =>
-{
-    options.HeaderName = "X-CSRF-TOKEN";
-});
-
-
 builder.Services
     .AddDbContext(builder.Configuration)
-    .RegisterServices();
+    .RegisterServices()
+    .AddBlobStorageService(builder.Configuration, builder.Environment)
+    .AddEndpointsApiExplorer()
+    .AddSwaggerGen()
+    .AddAntiforgery(options =>
+    {
+        options.HeaderName = "X-CSRF-TOKEN";
+    });
 
 var app = builder.Build();
 
