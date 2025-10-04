@@ -1,5 +1,6 @@
 using AutoMapper;
 using AntiqueHub.Core.Models;
+using AntiqueHub.Core.Entities;
 using AntiqueHub.Api.Profiles;
 using AntiqueHub.Api.Tests.Mocks;
 using AntiqueHub.Api.Tests.Helpers;

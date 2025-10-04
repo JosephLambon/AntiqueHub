@@ -1,5 +1,6 @@
 using AntiqueHub.Core.Interfaces;
 using AntiqueHub.Core.Models;
+using AntiqueHub.Core.Entities;
 using Moq;
 
 namespace AntiqueHub.Api.Tests.Mocks;

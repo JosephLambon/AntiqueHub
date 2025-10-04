@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
+using AntiqueHub.Core.Entities;
 
 namespace AntiqueHub.Core.Models;
 public class AntiqueForResponseDto

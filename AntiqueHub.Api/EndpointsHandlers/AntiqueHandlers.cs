@@ -1,8 +1,8 @@
 using AntiqueHub.Api.Services;
 using AutoMapper;
 using AntiqueHub.Core.Models;
+using AntiqueHub.Core.Entities;
 using AntiqueHub.Core.Interfaces;
-using AntiqueHub.Core.Repositories;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using AntiqueHub.Core.Constants;
@@ -83,11 +83,11 @@ public static class AntiqueHandlers
             antiqueEntity.CreatedAt = antiqueEntity.UpdatedAt = DateTimeOffset.UtcNow;
             antiqueEntity.Version = 1;
 
-            var antiqueToReturn = mapper.Map<AntiqueForResponseDto>(antiqueEntity);
 
             await antiqueRepository.AddAntiqueAsync(antiqueEntity);
             await antiqueRepository.SaveChangesAsync();
 
+            var antiqueToReturn = mapper.Map<AntiqueForResponseDto>(antiqueEntity);
             logger.LogInformation("Antique creation succeeded.");
 
             return TypedResults.CreatedAtRoute(

@@ -1,4 +1,4 @@
-using AntiqueHub.Core.Models;
+using AntiqueHub.Core.Entities;
 
 namespace AntiqueHub.Core.Interfaces;
 

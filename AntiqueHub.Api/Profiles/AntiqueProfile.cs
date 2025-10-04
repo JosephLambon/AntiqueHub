@@ -1,5 +1,6 @@
 using AutoMapper;
 using AntiqueHub.Core.Models;
+using AntiqueHub.Core.Entities;
 
 namespace AntiqueHub.Api.Profiles;
 

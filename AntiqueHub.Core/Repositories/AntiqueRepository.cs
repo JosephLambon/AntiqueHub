@@ -1,4 +1,5 @@
 using AntiqueHub.Core.Interfaces;
+using AntiqueHub.Core.Entities;
 using AntiqueHub.Core.Models;
 using Microsoft.EntityFrameworkCore;
 

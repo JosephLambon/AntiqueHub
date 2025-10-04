@@ -1,4 +1,2 @@
-1. Create Infrastructure project, configure local/remote runs accordingly w connection strings
-2. Create Services project. Increase performance of upload with just one connection to azure? 
-3. Understand & configure antiforgery on form-data requests.
-4. Write unit tests!
+1. Understand & configure antiforgery on form-data requests.
+2. Write functional tests!

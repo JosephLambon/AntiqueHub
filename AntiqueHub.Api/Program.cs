@@ -19,7 +19,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// app.UseAuth() lines go HERE!!!
+// app.UseAuth() lines go before anti forgery
 
 app.UseAntiforgery();
 app.RegisterAntiqueEndpoints();

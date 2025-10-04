@@ -33,12 +33,16 @@ public static class ServiceExtensions
                     ;
                 });
         });
-
+        
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         services.AddProblemDetails();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
-        services.AddAntiforgery(options => { options.HeaderName = "X-CSRF-TOKEN"; });
+        services.AddAntiforgery(options =>
+        {
+            options.FormFieldName = "AFFormField";
+            options.HeaderName = "X-CSRF-TOKEN"; 
+        });
         return services;
     }
 }
