@@ -1,16 +1,17 @@
 using AntiqueHub.Api.Services;
 using AutoMapper;
-using DocumentMiddleware.Core.Models;
+using AntiqueHub.Core.Models;
+using AntiqueHub.Core.Entities;
+using AntiqueHub.Core.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using DocumentMiddleware.Core.Constants;
+using AntiqueHub.Core.Constants;
 
 namespace AntiqueHub.Api.EndpointsHandlers;
 public static class AntiqueHandlers
 {
     public static async Task<Ok<IEnumerable<AntiqueForResponseDto>>> GetAntiquesAsync(
-        DocumentDbContext documentDbContext,
+        IAntiqueRepository antiqueRepository,
         IMapper mapper,
         ILogger<Antique> logger,
         [FromQuery] bool includeAvailable = true,
@@ -33,17 +34,13 @@ public static class AntiqueHandlers
         logger.LogInformation("Getting antiques...");
         return TypedResults.Ok(
             mapper.Map<IEnumerable<AntiqueForResponseDto>>(
-                await documentDbContext.Antiques
-                    .AsNoTracking()
-                    .Where(a => includedStatuses.Contains(a.Status))
-                    .ToListAsync())
+                await antiqueRepository.GetAntiquesAsync(includedStatuses)
+                )
         );
     }
     
-    
-    
     public static async Task<Results<CreatedAtRoute<AntiqueForResponseDto>,BadRequest<string>, UnprocessableEntity<string>,StatusCodeHttpResult>> CreateAntiqueAsync(
-        DocumentDbContext documentDbContext,
+        IAntiqueRepository antiqueRepository,
         IMapper mapper,
         [FromForm] AntiqueForCreationDto antiqueToCreate,
         ILogger<Antique> logger,
@@ -86,11 +83,11 @@ public static class AntiqueHandlers
             antiqueEntity.CreatedAt = antiqueEntity.UpdatedAt = DateTimeOffset.UtcNow;
             antiqueEntity.Version = 1;
 
+
+            await antiqueRepository.AddAntiqueAsync(antiqueEntity);
+            await antiqueRepository.SaveChangesAsync();
+
             var antiqueToReturn = mapper.Map<AntiqueForResponseDto>(antiqueEntity);
-
-            documentDbContext.Antiques.Add(antiqueEntity);
-            await documentDbContext.SaveChangesAsync();
-
             logger.LogInformation("Antique creation succeeded.");
 
             return TypedResults.CreatedAtRoute(
@@ -109,7 +106,7 @@ public static class AntiqueHandlers
     }
 
     public static async Task<Results<Ok<AntiqueForResponseDto>,NotFound<string>>> GetAntiqueByIdAsync(
-        DocumentDbContext documentDbContext,
+        IAntiqueRepository antiqueRepository,
         IMapper mapper,
         int antiqueId,
         ILogger<Antique> logger
@@ -118,12 +115,10 @@ public static class AntiqueHandlers
         logger.LogInformation("GET /antiques/{ID} received.",
             antiqueId
             );
-        
+
         var antiqueEntity = mapper.Map<AntiqueForResponseDto>(
-            await documentDbContext.Antiques
-            .Where(a => a.Id == antiqueId)
-            .FirstOrDefaultAsync()
-            );
+            await antiqueRepository.GetAntiqueByIdAsync(antiqueId)
+        );
 
         if (antiqueEntity == null)
             return TypedResults.NotFound<string>(
@@ -133,7 +128,7 @@ public static class AntiqueHandlers
     }
 
     public static async Task<Results<Ok<AntiqueForResponseDto>, UnprocessableEntity, NotFound<string>>> UpdateAntiqueAsync(
-        DocumentDbContext documentDbContext,
+        IAntiqueRepository antiqueRepository,
         IMapper mapper,
         int antiqueId,
         AntiqueForUpdateDto updatedAntiqueDto,
@@ -142,9 +137,7 @@ public static class AntiqueHandlers
     {
         logger.LogInformation("PATCH /antiques/{ID} request received.",
             antiqueId);
-        var existingAntiqueEntity = await documentDbContext.Antiques
-            .Where(a => a.Id == antiqueId)
-            .FirstOrDefaultAsync();
+        var existingAntiqueEntity = await antiqueRepository.GetAntiqueByIdAsync(antiqueId);
         
         if(existingAntiqueEntity == null)
             return TypedResults.NotFound<string>(
@@ -167,7 +160,7 @@ public static class AntiqueHandlers
             existingAntiqueEntity.UpdatedAt = DateTimeOffset.UtcNow;
             existingAntiqueEntity.Version += 1;
             
-            await documentDbContext.SaveChangesAsync();
+            await antiqueRepository.SaveChangesAsync();
         }
         catch(Exception ex)
         {

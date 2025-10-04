@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Http;
+using AntiqueHub.Core.Entities;
 
-namespace DocumentMiddleware.Core.Models;
+namespace AntiqueHub.Core.Models;
 public class AntiqueForResponseDto
 {
+    public int Id { get; set; }
     public string? Name { get; set; }
     public Status? Status { get; set; }
     public string? Description { get; set; }
@@ -13,10 +15,10 @@ public class AntiqueForResponseDto
 
 public class AntiqueForCreationDto
 {
-    public string? Name { get; set; }
-    public string? Description { get; set; }
-    public Status? Status { get; set; }
-    public decimal? Price { get; set; }
+    public required string Name { get; set; }
+    public required string Description { get; set; }
+    public required Status Status { get; set; }
+    public required decimal Price { get; set; }
     public IFormFileCollection? ImageFiles { get; set; }
 }
 

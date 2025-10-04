@@ -3,18 +3,10 @@ using AntiqueHub.Api.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MOVE THESE INTO EXTENSIONS
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddAntiforgery(options =>
-{
-    options.HeaderName = "X-CSRF-TOKEN";
-});
-
-
 builder.Services
     .AddDbContext(builder.Configuration)
-    .RegisterServices();
+    .RegisterServices()
+    .AddBlobStorageService(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 
@@ -27,7 +19,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// app.UseAuth() lines go HERE!!!
+// app.UseAuth() lines go before anti forgery
 
 app.UseAntiforgery();
 app.RegisterAntiqueEndpoints();

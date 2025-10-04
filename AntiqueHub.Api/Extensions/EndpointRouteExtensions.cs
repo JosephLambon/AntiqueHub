@@ -1,5 +1,5 @@
 ﻿using AntiqueHub.Api.EndpointsHandlers;
-using DocumentMiddleware.Core.Constants;
+using AntiqueHub.Core.Constants;
 
 namespace AntiqueHub.Api.Extensions
 {
@@ -7,16 +7,22 @@ namespace AntiqueHub.Api.Extensions
     {
         public static void RegisterAntiqueEndpoints(this IEndpointRouteBuilder app)
         {
+            var antiForgeryTokenEndpoints = app.MapGroup("/antiforgery-token")
+                .WithOpenApi()
+                .WithTags("Antiforgery tokens.");
+            
+            antiForgeryTokenEndpoints.MapGet("", TokenHandlers.GetAntiForgeryToken)
+                .WithSummary("Returns valid antiforgery token.");
+            
             var imageEndpoints = app.MapGroup("/antiques")
                 .WithOpenApi()
                 .WithTags("Antique endpoints");
 
             imageEndpoints.MapGet("", AntiqueHandlers.GetAntiquesAsync)
                 .WithSummary("Retrieve antiques based on their status");
-            
+
             imageEndpoints.MapPost("", AntiqueHandlers.CreateAntiqueAsync)
-                .WithSummary("Add new antique")
-                .DisableAntiforgery();
+                .WithSummary("Add new antique");
             
             imageEndpoints.MapGet("/{antiqueId}", AntiqueHandlers.GetAntiqueByIdAsync)
                 .WithName(Routes.GET_ANTIQUE_BY_ID)

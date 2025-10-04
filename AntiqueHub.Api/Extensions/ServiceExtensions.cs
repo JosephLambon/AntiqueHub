@@ -1,25 +1,18 @@
-using Microsoft.AspNetCore.Http.Json;
-using DocumentMiddleware.Core.Models;
+using AntiqueHub.Core.Repositories;
+using AntiqueHub.Core.Models;
 using System.Text.Json.Serialization;
 using AntiqueHub.Api.Services;
+using AntiqueHub.Core.Interfaces;
+
 
 namespace AntiqueHub.Api.Extensions;
 public static class ServiceExtensions
 {
     public static IServiceCollection RegisterServices(this IServiceCollection services)
     {
-        services.AddTransient<DocumentDbContext>();
-        // services.AddTransient<IProductRepository, ProductRepository>();
+        services.AddScoped<AntiqueDbContext>();
+        services.AddScoped<IAntiqueRepository, AntiqueRepository>();
         services.AddTransient<IFileService, FileService>();
-        services.AddCors(options =>
-        {
-            options.AddDefaultPolicy(
-                policy =>
-                {
-                    policy.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
-                    ;
-                });
-        });
 
         // Defaults enum results to be returned as strings
         services.ConfigureHttpJsonOptions(options =>
@@ -31,9 +24,25 @@ public static class ServiceExtensions
         {
             options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         });
-
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(
+                policy =>
+                {
+                    policy.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+                    ;
+                });
+        });
+        
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         services.AddProblemDetails();
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen();
+        services.AddAntiforgery(options =>
+        {
+            options.FormFieldName = "AFFormField";
+            options.HeaderName = "X-CSRF-TOKEN"; 
+        });
         return services;
     }
 }
