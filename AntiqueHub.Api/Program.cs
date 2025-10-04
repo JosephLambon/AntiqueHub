@@ -6,13 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddDbContext(builder.Configuration)
     .RegisterServices()
-    .AddBlobStorageService(builder.Configuration, builder.Environment)
-    .AddEndpointsApiExplorer()
-    .AddSwaggerGen()
-    .AddAntiforgery(options =>
-    {
-        options.HeaderName = "X-CSRF-TOKEN";
-    });
+    .AddBlobStorageService(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 

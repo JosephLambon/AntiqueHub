@@ -39,8 +39,6 @@ namespace AntiqueHub.Api.Tests.Services
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Mock.Of<Response<BlobContentInfo>>());
         }
-
-        
         
         [Fact]
         public async Task UploadFileAsync_ShouldThrow_WhenImageFileIsNull()

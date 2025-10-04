@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http.Internal;
 namespace AntiqueHub.Core.Models;
 public class AntiqueForResponseDto
 {
+    public int Id { get; set; }
     public string? Name { get; set; }
     public Status? Status { get; set; }
     public string? Description { get; set; }
