@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AntiqueHub.Core", "AntiqueH
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AntiqueHub.Api.Tests", "AntiqueHub.Api.Tests\AntiqueHub.Api.Tests.csproj", "{F85B5462-49DD-49FD-B020-000F03B9C679}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AntiqueHub.Api.IntegrationTests", "AntiqueHub.Api.IntegrationTests\AntiqueHub.Api.IntegrationTests.csproj", "{DDE45C21-6B24-42AB-A2BD-4B94EC24960A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{F85B5462-49DD-49FD-B020-000F03B9C679}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F85B5462-49DD-49FD-B020-000F03B9C679}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F85B5462-49DD-49FD-B020-000F03B9C679}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDE45C21-6B24-42AB-A2BD-4B94EC24960A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDE45C21-6B24-42AB-A2BD-4B94EC24960A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDE45C21-6B24-42AB-A2BD-4B94EC24960A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDE45C21-6B24-42AB-A2BD-4B94EC24960A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -25,3 +25,6 @@ app.UseAntiforgery();
 app.RegisterAntiqueEndpoints();
 
 app.Run();
+
+// Enable Integration tests to access
+public partial class Program { }
