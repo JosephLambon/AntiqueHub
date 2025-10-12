@@ -51,7 +51,7 @@ public static class AntiqueHandlers
         var uploadedFiles = new List<string>();
         try
         {
-            if (antiqueToCreate.ImageFiles == null)
+            if (antiqueToCreate.ImageFiles == null || !antiqueToCreate.ImageFiles.Any())
             {
                 logger.LogError("No ImageFiles received in request.");
                 return TypedResults.BadRequest("ImageFiles must be provided.");
