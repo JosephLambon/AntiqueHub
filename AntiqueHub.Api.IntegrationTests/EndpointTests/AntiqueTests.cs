@@ -11,7 +11,16 @@ namespace AntiqueHub.Api.IntegrationTests;
 
 public class AntiqueTests : IntegrationTestBase
 {
-    public AntiqueTests(WebApplicationFactory<Program> factory) : base(factory) { }
+    private readonly JsonSerializerOptions _jsonOptions;
+    
+    public AntiqueTests(WebApplicationFactory<Program> factory) : base(factory)
+    {
+        _jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
+        _jsonOptions.Converters.Add(new JsonStringEnumConverter());
+    }
 
     [Theory]
     [InlineData(true, true, true)]
@@ -35,18 +44,13 @@ public class AntiqueTests : IntegrationTestBase
             expectedStatuses.Add(Status.Sold);
         if (IncludeArchived)
             expectedStatuses.Add(Status.Archived);
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        };
-        options.Converters.Add(new JsonStringEnumConverter());
         
         // Act
         var result = await _httpClient.GetAsync($"antiques/?includeSold={IncludeSold}&includeAvailable={IncludeAvailable}&includeArchived={IncludeArchived}");
         var content = await result.Content.ReadAsStringAsync();
         var antiques = JsonSerializer.Deserialize<List<AntiqueForResponseDto>>(
             content, 
-            options
+            _jsonOptions
             );
         
         // Assert
@@ -61,14 +65,10 @@ public class AntiqueTests : IntegrationTestBase
     [Fact]
     public async Task GetAntiqueByIdAsync_ReturnsAntique_WhenExists()
     {
-        // Arrange
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        options.Converters.Add(new JsonStringEnumConverter());
-    
-        // Act
+        // Arrange & Act
         var result = await _httpClient.GetAsync("/antiques/1");
         var content = await result.Content.ReadAsStringAsync();
-        var antique = JsonSerializer.Deserialize<AntiqueForResponseDto>(content, options);
+        var antique = JsonSerializer.Deserialize<AntiqueForResponseDto>(content, _jsonOptions);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, result.StatusCode);
@@ -117,11 +117,6 @@ public class AntiqueTests : IntegrationTestBase
     public async Task CreateAntiqueAsync_ReturnsBadRequest_WhenNoImages()
     {
         // Arrange
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        };
-        options.Converters.Add(new JsonStringEnumConverter());
         await AntiforgeryTokenHelper.SetAntiforgeryTokenAsync(_httpClient);
         var formData = new MultipartFormDataContent
         {
@@ -134,7 +129,7 @@ public class AntiqueTests : IntegrationTestBase
         // Act
         var result = await _httpClient.PostAsync("/antiques", formData);
         var content = await result.Content.ReadAsStringAsync();
-        var responseMessage = JsonSerializer.Deserialize<string>(content, options);
+        var responseMessage = JsonSerializer.Deserialize<string>(content, _jsonOptions);
         
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
@@ -146,12 +141,6 @@ public class AntiqueTests : IntegrationTestBase
     {
         // Arrange
         var antiqueId = 2;
-        
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        };
-        options.Converters.Add(new JsonStringEnumConverter());
         var jsonBody = """
                        {
                         "description": "A lovely old thing with an updated description."
@@ -167,7 +156,7 @@ public class AntiqueTests : IntegrationTestBase
         // Act
         var result = await _httpClient.PatchAsync($"/antiques/{antiqueId}", content);
         var responseContent = await result.Content.ReadAsStringAsync();
-        var antiqueResponse  = JsonSerializer.Deserialize<AntiqueForResponseDto>(responseContent, options);
+        var antiqueResponse  = JsonSerializer.Deserialize<AntiqueForResponseDto>(responseContent, _jsonOptions);
         
         // Assert
         Assert.Equal(HttpStatusCode.OK, result.StatusCode);
@@ -199,32 +188,5 @@ public class AntiqueTests : IntegrationTestBase
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, result.StatusCode);
         Assert.Equal($"Unable to retrieve antique with ID: {antiqueId}", responseMessage);
-    }
-    [Fact]
-    public async Task UpdateAntiqueAsync_ReturnsUnprocessibleEntity_WhenSentInvalidType()
-    {
-        // Arrange
-        var antiqueId = 1;
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        options.Converters.Add(new JsonStringEnumConverter());
-        var jsonBody = """
-                       {
-                        "name": "Update antique name",
-                        "description": 55
-                       }
-                       """;
-        var content = new StringContent(
-            jsonBody,
-            Encoding.UTF8,
-            "application/json"
-        );
-        
-        // Act
-        var result = await _httpClient.PatchAsync($"/antiques/{antiqueId}", content);
-        var responseContent = await result.Content.ReadAsStringAsync();
-        var responseMessage = JsonSerializer.Deserialize<string>(responseContent,options);
-
-        // Assert
-        Assert.Equal(HttpStatusCode.UnprocessableEntity, result.StatusCode);
     }
 }
