@@ -109,6 +109,7 @@ namespace AntiqueHub.Api.Tests.EndpointHandlers
             var mockRepo = AntiqueRepositoryMock.GetAntiqueRepository();
             var expectedAntique = new AntiqueForResponseDto()
             {
+                Id = 1,
                 Name = "Victorian Chair",
                 Description = "A 19th century Victorian-style chair made of oak.",
                 Status = Status.Available,
@@ -169,6 +170,7 @@ namespace AntiqueHub.Api.Tests.EndpointHandlers
             };
             var expectedResponse = new AntiqueForResponseDto
             {
+                Id = 123,
                 Name = "Test Antique",
                 Description = "A test antique",
                 Price = 50.0m,
@@ -301,6 +303,7 @@ namespace AntiqueHub.Api.Tests.EndpointHandlers
             };
             var expectedResponse = new AntiqueForResponseDto
             {
+                Id = 1,
                 Name = "Restored Vase",
                 Description = "Now looks great",
                 Status = Status.Sold,
