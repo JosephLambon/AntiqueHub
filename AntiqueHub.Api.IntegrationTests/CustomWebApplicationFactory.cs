@@ -4,35 +4,23 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using AntiqueHub.Api.Services;
 using AntiqueHub.Core.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace AntiqueHub.Api.IntegrationTests;
 
-public class CustomWebApplicationFactory : WebApplicationFactory<Program>
+public class CustomWebApplicationFactory(PostgreSqlContainerFixture sharedFixture) : WebApplicationFactory<Program>
 {
-    private readonly HttpClient _httpClient;
-    private readonly string _postgresConnectionString;
-    
-    public CustomWebApplicationFactory(string postgreSqlConnectionString)
-    {
-        _httpClient = CreateClient();
-        _postgresConnectionString = postgreSqlConnectionString;
-    }
+    public PostgreSqlContainerFixture SharedFixture => sharedFixture; 
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureServices(services =>
         {
-            // Find and remove the existing DbContext registration
-            var descriptor = services.SingleOrDefault(
-                d => d.ServiceType == typeof(DbContextOptions<AntiqueDbContext>));
-
-            if (descriptor != null)
-                services.Remove(descriptor);
-            
-            services.AddDbContext<AntiqueDbContext>(options =>
-            {
-                options.UseNpgsql(_postgresConnectionString);
-            });
+            services.RemoveAll(typeof(DbContextOptions<AntiqueDbContext>));
+            services.RemoveAll(typeof(AntiqueDbContext));
+        
+            services.AddDbContext<AntiqueDbContext>(opts =>
+                opts.UseNpgsql(sharedFixture.DatabaseConnectionString));
         });
     }
 }

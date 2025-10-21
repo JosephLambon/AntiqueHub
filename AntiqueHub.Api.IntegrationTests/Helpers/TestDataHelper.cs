@@ -5,7 +5,7 @@ namespace AntiqueHub.Api.IntegrationTests;
 
 public static class TestDataHelper
 {
-    public static void Seed(AntiqueDbContext db)
+    public static async Task SeedAsync(AntiqueDbContext db)
     {
         if (db.Antiques.Any())
             return;
@@ -63,10 +63,28 @@ public static class TestDataHelper
                 CreatedAt = DateTimeOffset.UtcNow,
                 UpdatedAt = DateTimeOffset.UtcNow,
                 Version = 1
+            },
+            new()
+            {
+                Id = 4,
+                Name = "Vintage tractor",
+                Status = Status.Archived,
+                Description = "Built in the 1920s. Doesn't run.",
+                Price = 1200m,
+                Thumbnail = "26e6805f-a05a-490b-a5fb-7d9de71acdf2.jpg",
+                Images = new[]
+                {
+                    "27e6805f-a05a-490b-a5fb-7d9de71acdf2.jpg",
+                    "c314052a-a157-47fa-a855-a53aca941066.png",
+                    "791d6b3b-eafe-4f36-b017-45d88c4a25ee.png"
+                },
+                CreatedAt = DateTimeOffset.UtcNow,
+                UpdatedAt = DateTimeOffset.UtcNow,
+                Version = 1
             }
         };
 
-        db.Antiques.AddRange(antiques);
-        db.SaveChanges();
+        await db.Antiques.AddRangeAsync(antiques);
+        await db.SaveChangesAsync();
     }
 }
