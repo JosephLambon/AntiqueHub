@@ -4,7 +4,7 @@ using AntiqueHub.Api.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
-    .AddDbContext(builder.Configuration)
+    .AddDbContext(builder.Configuration, builder.Environment)
     .RegisterServices()
     .AddBlobStorageService(builder.Configuration, builder.Environment);
 

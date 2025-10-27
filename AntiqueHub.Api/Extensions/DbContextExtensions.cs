@@ -1,4 +1,4 @@
-    using AntiqueHub.Core.Models;
+using AntiqueHub.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations.Internal;
 
