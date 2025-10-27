@@ -6,12 +6,23 @@ namespace AntiqueHub.Api.Extensions;
 
 public static class DbContextExtensions
 {
-    public static IServiceCollection AddDbContext(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddDbContext(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment env)
     {
-        services.AddDbContext<AntiqueDbContext>(options =>
+        if (env.IsDevelopment())
         {
-            options.UseNpgsql(configuration.GetConnectionString("default"));
-        });
+            services.AddDbContext<AntiqueDbContext>(options =>
+            {
+                options.UseNpgsql(configuration.GetConnectionString("psqlLocal"));
+            });
+        }
+        else
+        {
+            // Defined in app service environment variables
+            services.AddDbContext<AntiqueDbContext>(options =>
+            {
+                options.UseNpgsql(configuration.GetConnectionString("psqlProduction"));
+            });
+        }
         return services;
     }
 }
