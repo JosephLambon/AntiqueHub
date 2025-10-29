@@ -3,6 +3,8 @@ using AntiqueHub.Api.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddEnvironmentVariables();
+
 builder.Services
     .AddDbContext(builder.Configuration, builder.Environment)
     .RegisterServices()
