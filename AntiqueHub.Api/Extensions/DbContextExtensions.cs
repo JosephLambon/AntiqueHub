@@ -18,6 +18,9 @@ public static class DbContextExtensions
         else
         {
             // Defined in app service environment variables
+            Console.WriteLine($"DEBUG: psqlProduction = {configuration.GetConnectionString("psqlProduction")}");
+
+
             services.AddDbContext<AntiqueDbContext>(options =>
             {
                 options.UseNpgsql(configuration.GetConnectionString("psqlProduction"));
