@@ -1,5 +1,6 @@
-using Microsoft.Extensions.FileProviders;
+using AntiqueHub.Core.Models;
 using AntiqueHub.Api.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,13 @@ builder.Services
     .AddBlobStorageService(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AntiqueDbContext>();
+     // Apply migrations on app startup
+    db.Database.Migrate();
+}
 
 app.UseCors();
 
