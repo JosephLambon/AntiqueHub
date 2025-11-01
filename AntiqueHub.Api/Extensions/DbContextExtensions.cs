@@ -17,13 +17,14 @@ public static class DbContextExtensions
         }
         else
         {
+            var conn = Environment.GetEnvironmentVariable("CUSTOMCONNSTR_psqlProduction");
             // Defined in app service environment variables
-            Console.WriteLine($"DEBUG: psqlProduction = {configuration.GetConnectionString("psqlProduction")}");
+            Console.WriteLine($"DEBUG: psqlProduction = {conn}");
 
 
             services.AddDbContext<AntiqueDbContext>(options =>
             {
-                options.UseNpgsql(configuration.GetConnectionString("psqlProduction"));
+                options.UseNpgsql(conn);
             });
         }
         return services;
