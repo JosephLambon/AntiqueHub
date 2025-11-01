@@ -17,7 +17,9 @@ public static class DbContextExtensions
         }
         else
         {
-            var conn = Environment.GetEnvironmentVariable("CUSTOMCONNSTR_psqlProduction");
+            var conn = configuration.GetConnectionString("psqlProduction")
+               ?? Environment.GetEnvironmentVariable("CUSTOMCONNSTR_psqlProduction")
+               ?? Environment.GetEnvironmentVariable("POSTGRESQLCONNSTR_psqlProduction");
             // Defined in app service environment variables
             Console.WriteLine($"DEBUG: psqlProduction = {conn}");
 
