@@ -6,7 +6,7 @@ namespace AntiqueHub.Api.EndpointsHandlers;
 
 public static class TokenHandlers
 {
-    public static async Task<IResult> GetAntiForgeryToken(
+    public static IResult GetAntiForgeryToken(
         [FromServices] IAntiforgery antiForgery, HttpContext http,  [FromServices] ILogger<Antique> logger) 
     {
         logger.LogInformation("GET /antiforgery-token request received...");

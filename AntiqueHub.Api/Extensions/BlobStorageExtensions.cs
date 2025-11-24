@@ -21,7 +21,7 @@ public static class BlobStorageExtensions
                 "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="
             );
 
-            var localUri = new Uri($"http://127.0.0.1:10000/devstoreaccount1/{configuration["BlobStorage:ContainerName"]}");
+            var localUri = new Uri($"http://antique-blob-storage:10000/devstoreaccount1/{configuration["BlobStorage:ContainerName"]}");
             containerClient = new BlobContainerClient(localUri, credential);
         }
         else
@@ -32,6 +32,16 @@ public static class BlobStorageExtensions
                 new Uri($"https://{accountName}.blob.core.windows.net/{containerName}"),
                 new DefaultAzureCredential()
             );
+        }
+
+        try
+        {
+            var createContainerTask = containerClient.CreateIfNotExistsAsync();
+            createContainerTask.Wait();
+        } catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating blob container: {ex.Message}");
+            throw;
         }
 
         services.AddSingleton(new BlobStorageService(containerClient));

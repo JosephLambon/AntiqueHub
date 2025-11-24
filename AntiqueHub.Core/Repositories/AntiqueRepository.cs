@@ -20,7 +20,7 @@ public class AntiqueRepository(AntiqueDbContext context) : IAntiqueRepository
         await _context.Antiques.FirstOrDefaultAsync(a => a.Id == id);
     public async Task AddAntiqueAsync(Antique antique) =>
         await _context.Antiques.AddAsync(antique);
-    public async Task UpdateAntiqueAsync(Antique antique) =>
+    public void UpdateAntiqueAsync(Antique antique) =>
         _context.Antiques.Update(antique);
     public async Task SaveChangesAsync() =>
         await _context.SaveChangesAsync();

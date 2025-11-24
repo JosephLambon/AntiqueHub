@@ -1,0 +1,35 @@
+services:
+  antique-api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # Use the service name 'antique-db' as the Server hostname
+      - ConnectionStrings__psqlLocal=Server=antique-db;Port=5432;Database=mydatabase;User Id=testuser;Password=testpassword;
+    depends_on:
+      - antique-db
+      - antique-blob-storage
+
+  antique-db:
+    image: postgres:latest
+    container_name: antique-hub-postgres-db
+    environment:
+      - POSTGRES_DB=mydatabase
+      - POSTGRES_USER=testuser
+      - POSTGRES_PASSWORD=testpassword
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testuser -d mydatabase"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  antique-blob-storage:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: antique-hub-blob-storage
+    ports:
+      - "10000:10000"
