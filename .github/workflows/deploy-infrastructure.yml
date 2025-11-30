@@ -70,7 +70,7 @@ jobs:
         run: terraform plan -var-file="variables/dev.tfvars" -out=dev.tfplan
 
       - name: Upload Plan Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dev-tfplan
           path: ${{ env.TF_WORKING_DIR }}/dev.tfplan
@@ -115,7 +115,7 @@ jobs:
   plan-test:
     needs: [deploy-dev]
     if: |
-      github.event.inputs.deploy_test == true && (needs.deploy-dev.result == 'success' || needs.deploy-dev.result == 'skipped')
+      github.event.inputs.deploy_test == 'true' && (needs.deploy-dev.result == 'success' || needs.deploy-dev.result == 'skipped')
     name: Test - Plan
     runs-on: ubuntu-latest
     defaults:
@@ -142,7 +142,7 @@ jobs:
         run: terraform plan -var-file="variables/test.tfvars" -out=test.tfplan
 
       - name: Upload Plan Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-tfplan
           path: ${{ env.TF_WORKING_DIR }}/test.tfplan
@@ -188,7 +188,7 @@ jobs:
   plan-prod:
     needs: [deploy-test]
     if: |
-      github.event.inputs.deploy_prod == true && (needs.deploy-test.result == 'success' || needs.deploy-test.result == 'skipped')
+      github.event.inputs.deploy_prod == 'true' && (needs.deploy-test.result == 'success' || needs.deploy-test.result == 'skipped')
     name: Prod - Plan
     runs-on: ubuntu-latest
     defaults:
@@ -215,7 +215,7 @@ jobs:
         run: terraform plan -var-file="variables/prod.tfvars" -out=prod.tfplan
 
       - name: Upload Plan Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: prod-tfplan
           path: ${{ env.TF_WORKING_DIR }}/prod.tfplan
