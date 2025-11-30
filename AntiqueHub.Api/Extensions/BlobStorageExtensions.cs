@@ -16,6 +16,7 @@ public static class BlobStorageExtensions
 
         if (env.IsDevelopment())
         {
+            // Account key is the Azurite default accountKey - works for anyone
             var credential = new StorageSharedKeyCredential(
                 "devstoreaccount1",
                 "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="
