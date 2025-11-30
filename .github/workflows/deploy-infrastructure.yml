@@ -3,17 +3,23 @@ name: Deploy Infrastructure (IaC)
 on:
   workflow_dispatch:
     inputs:
-      target_env:
-        description: 'Target Environment Scope (Select "all" to run full sequence)'
-        required: true
-        default: 'all'
-        type: choice
-        options:
-          - all
-          - dev
-          - test
-          - prod
-
+      description: 'Deploy Development (DEV) Environment'
+        deploy_dev:
+          description: 'Deploy Development (DEV) Environment'
+          required: true
+          default: false
+          type: boolean
+        deploy_test:
+          description: 'Deploy Test (TEST) Environment'
+          required: true
+          default: false
+          type: boolean
+        deploy_prod:
+          description: 'Deploy Production (PROD) Environment'
+          required: true
+          default: false
+          type: boolean
+          
 permissions:
   id-token: write # Required for Azure OIDC authentication
   contents: read
@@ -33,7 +39,7 @@ jobs:
   # DEV ENVIRONMENT
   # ===========================================================================
   plan-dev:
-    if: github.event.inputs.target_env == 'all' || github.event.inputs.target_env == 'dev'
+    if: github.event.inputs.deploy_dev == true
     name: 'Dev: Plan'
     runs-on: ubuntu-latest
     defaults:
@@ -41,7 +47,15 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
     steps:
       - uses: actions/checkout@v3
-
+        
+      - name: 'Azure Login via OIDC'
+          uses: azure/login@v1
+          with:
+            client-id: ${{ secrets.AZURE_CLIENT_ID }}
+            tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+            subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+            enable-AzPSSession: true
+            
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
@@ -73,6 +87,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: 'Azure Login via OIDC'
+          uses: azure/login@v1
+          with:
+            client-id: ${{ secrets.AZURE_CLIENT_ID }}
+            tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+            subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+            enable-AzPSSession: true  
+      
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
@@ -90,15 +112,11 @@ jobs:
 
   # ===========================================================================
   # TEST ENVIRONMENT
-  # Runs only if 'all' is selected or 'test' is selected. 
-  # If 'all', it depends on deploy-dev success.
   # ===========================================================================
   plan-test:
     needs: [deploy-dev]
-    # Logic: Run if 'test' selected directly OR if 'all' selected (which implies dev succeeded due to 'needs')
     if: |
-      always() && 
-      (github.event.inputs.target_env == 'test' || (github.event.inputs.target_env == 'all' && needs.deploy-dev.result == 'success'))
+      github.event.inputs.deploy_test == true && (needs.deploy-dev.result == 'success' || needs.deploy-dev.result == 'skipped')
     name: 'Test: Plan'
     runs-on: ubuntu-latest
     defaults:
@@ -106,7 +124,15 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
     steps:
       - uses: actions/checkout@v3
-
+        
+      - name: 'Azure Login via OIDC'
+          uses: azure/login@v1
+          with:
+            client-id: ${{ secrets.AZURE_CLIENT_ID }}
+            tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+            subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+            enable-AzPSSession: true
+            
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
@@ -133,6 +159,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: 'Azure Login via OIDC'
+          uses: azure/login@v1
+          with:
+            client-id: ${{ secrets.AZURE_CLIENT_ID }}
+            tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+            subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+            enable-AzPSSession: true
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
@@ -155,8 +189,7 @@ jobs:
   plan-prod:
     needs: [deploy-test]
     if: |
-      always() && 
-      (github.event.inputs.target_env == 'prod' || (github.event.inputs.target_env == 'all' && needs.deploy-test.result == 'success'))
+      github.event.inputs.deploy_prod == true && (needs.deploy-test.result == 'success' || needs.deploy-test.result == 'skipped')
     name: 'Prod: Plan'
     runs-on: ubuntu-latest
     defaults:
@@ -164,6 +197,14 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
     steps:
       - uses: actions/checkout@v3
+        
+      - name: 'Azure Login via OIDC'
+          uses: azure/login@v1
+          with:
+            client-id: ${{ secrets.AZURE_CLIENT_ID }}
+            tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+            subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+            enable-AzPSSession: true
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -190,6 +231,14 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
     steps:
       - uses: actions/checkout@v3
+        
+      - name: 'Azure Login via OIDC'
+          uses: azure/login@v1
+          with:
+            client-id: ${{ secrets.AZURE_CLIENT_ID }}
+            tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+            subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+            enable-AzPSSession: true
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
