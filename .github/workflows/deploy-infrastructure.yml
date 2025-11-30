@@ -1,0 +1,207 @@
+name: Deploy Infrastructure (IaC)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: 'Target Environment Scope (Select "all" to run full sequence)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - dev
+          - test
+          - prod
+
+permissions:
+  id-token: write # Required for Azure OIDC authentication
+  contents: read
+
+env:
+  TF_LOG: INFO
+  TF_WORKING_DIR: 'AntiqueHub/IaC'
+  # Secrets must be set in GitHub Actions Secrets
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  # Database password secret
+  TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+
+jobs:
+  # ===========================================================================
+  # DEV ENVIRONMENT
+  # ===========================================================================
+  plan-dev:
+    if: github.event.inputs.target_env == 'all' || github.event.inputs.target_env == 'dev'
+    name: 'Dev: Plan'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: latest
+
+      - name: Terraform Init
+        run: terraform init -backend-config="variables/backend-dev.tfvars"
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -var-file="variables/dev.tfvars" -out=dev.tfplan
+
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dev-tfplan
+          path: ${{ env.TF_WORKING_DIR }}/dev.tfplan
+
+  deploy-dev:
+    needs: plan-dev
+    name: 'Dev: Apply'
+    runs-on: ubuntu-latest
+    environment: dev
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Download Plan Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: dev-tfplan
+          path: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Init
+        run: terraform init -backend-config="variables/backend-dev.tfvars"
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve dev.tfplan
+
+  # ===========================================================================
+  # TEST ENVIRONMENT
+  # Runs only if 'all' is selected or 'test' is selected. 
+  # If 'all', it depends on deploy-dev success.
+  # ===========================================================================
+  plan-test:
+    needs: [deploy-dev]
+    # Logic: Run if 'test' selected directly OR if 'all' selected (which implies dev succeeded due to 'needs')
+    if: |
+      always() && 
+      (github.event.inputs.target_env == 'test' || (github.event.inputs.target_env == 'all' && needs.deploy-dev.result == 'success'))
+    name: 'Test: Plan'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: terraform init -backend-config="variables/backend-test.tfvars"
+
+      - name: Terraform Plan
+        run: terraform plan -var-file="variables/test.tfvars" -out=test.tfplan
+
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-tfplan
+          path: ${{ env.TF_WORKING_DIR }}/test.tfplan
+
+  deploy-test:
+    needs: plan-test
+    name: 'Test: Apply'
+    runs-on: ubuntu-latest
+    environment: test # <--- Configure Environment Protection rules for 'test'
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Download Plan Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: test-tfplan
+          path: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Init
+        run: terraform init -backend-config="variables/backend-test.tfvars"
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve test.tfplan
+
+  # ===========================================================================
+  # PROD ENVIRONMENT
+  # Runs only if 'all' is selected or 'prod' is selected.
+  # ===========================================================================
+  plan-prod:
+    needs: [deploy-test]
+    if: |
+      always() && 
+      (github.event.inputs.target_env == 'prod' || (github.event.inputs.target_env == 'all' && needs.deploy-test.result == 'success'))
+    name: 'Prod: Plan'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: terraform init -backend-config="variables/backend-prod.tfvars"
+
+      - name: Terraform Plan
+        run: terraform plan -var-file="variables/prod.tfvars" -out=prod.tfplan
+
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: prod-tfplan
+          path: ${{ env.TF_WORKING_DIR }}/prod.tfplan
+
+  deploy-prod:
+    needs: plan-prod
+    name: 'Prod: Apply'
+    runs-on: ubuntu-latest
+    environment: prod # <--- Configure strict Environment Protection rules for 'prod'
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Download Plan Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: prod-tfplan
+          path: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Init
+        run: terraform init -backend-config="variables/backend-prod.tfvars"
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve prod.tfplan
