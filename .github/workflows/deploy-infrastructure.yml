@@ -3,7 +3,6 @@ name: Deploy Infrastructure (IaC)
 on:
   workflow_dispatch:
     inputs:
-      description: 'Deploy Development (DEV) Environment'
         deploy_dev:
           description: 'Deploy Development (DEV) Environment'
           required: true
