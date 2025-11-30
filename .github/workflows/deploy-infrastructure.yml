@@ -38,7 +38,7 @@ jobs:
   # DEV ENVIRONMENT
   # ===========================================================================
   plan-dev:
-    if: github.event.inputs.deploy_dev == true
+    if: github.event.inputs.deploy_dev == 'true'
     name: Dev - Plan
     runs-on: ubuntu-latest
     defaults:
