@@ -6,6 +6,7 @@ services:
     ports:
       - "8080:8080"
     environment:
+      - BlobStorage:Host=antique-blob-storage
       - ASPNETCORE_ENVIRONMENT=Development
       # Use the service name 'antique-db' as the Server hostname
       - ConnectionStrings__psqlLocal=Server=antique-db;Port=5432;Database=mydatabase;User Id=testuser;Password=testpassword;

@@ -21,7 +21,9 @@ public static class BlobStorageExtensions
                 "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="
             );
 
-            var localUri = new Uri($"http://antique-blob-storage:10000/devstoreaccount1/{configuration["BlobStorage:ContainerName"]}");
+            var blobHost = configuration["BlobStorage:Host"];
+            var containerName = configuration["BlobStorage:ContainerName"];
+            var localUri = new Uri($"http://{blobHost}:10000/devstoreaccount1/{containerName}");
             containerClient = new BlobContainerClient(localUri, credential);
         }
         else
