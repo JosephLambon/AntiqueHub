@@ -6,12 +6,12 @@ on:
       deploy_dev:
         description: 'Deploy Development (DEV) Environment'
         required: true
-        default: false
+        default: true
         type: boolean
       deploy_test:
         description: 'Deploy Test (TEST) Environment'
         required: true
-        default: false
+        default: true
         type: boolean
       deploy_prod:
         description: 'Deploy Production (PROD) Environment'
@@ -39,7 +39,7 @@ jobs:
   # ===========================================================================
   plan-dev:
     if: github.event.inputs.deploy_dev == true
-    name: 'Dev: Plan'
+    name: Dev - Plan
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -189,7 +189,7 @@ jobs:
     needs: [deploy-test]
     if: |
       github.event.inputs.deploy_prod == true && (needs.deploy-test.result == 'success' || needs.deploy-test.result == 'skipped')
-    name: 'Prod: Plan'
+    name: Prod - Plan
     runs-on: ubuntu-latest
     defaults:
       run:
