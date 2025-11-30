@@ -79,14 +79,13 @@ public static class AntiqueRepositoryMock
             })
             .Returns(Task.CompletedTask)
             .Verifiable();
-
+    
         mockRepo.Setup(r => r.UpdateAntiqueAsync(It.IsAny<Antique>()))
             .Callback<Antique>(antique =>
             {
                 antique.UpdatedAt = DateTimeOffset.UtcNow;
                 antique.Version += 1;
             })
-            .Returns(Task.CompletedTask)
             .Verifiable();
 
         return mockRepo;
