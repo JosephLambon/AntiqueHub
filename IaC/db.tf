@@ -9,7 +9,7 @@ resource "azurerm_postgresql_flexible_server" "postgres" {
   version             = "17"
 
   administrator_login    = "psqladmin"
-  administrator_password = random_string.db_password[count.index].result # Use a generated secure password
+  administrator_password = var.db_password
   
   zone                   = "1"
   storage_mb             = var.db_storage_mb
@@ -23,8 +23,8 @@ resource "azurerm_postgresql_flexible_server" "postgres" {
 
 # Output the DB connection string for the PROD environment for reference
 output "prod_db_connection_string" {
-  value = count(azurerm_postgresql_flexible_server.postgres) > 0 ? 
-    "Host=${azurerm_postgresql_flexible_server.postgres[0].fqdn};Username=psqladmin@${azurerm_postgresql_flexible_server.postgres[0].name};Password=<SECRET>;Database=postgres" :
-    "Non-Production database is shared."
+  value = var.create_database && count(azurerm_postgresql_flexible_server.postgres) > 0 ? 
+      "Host=${azurerm_postgresql_flexible_server.postgres[0].fqdn};Username=psqladmin@${azurerm_postgresql_flexible_server.postgres[0].name};Password=${var.db_password};Database=postgres" : 
+      "Database deployment skipped or connection string not available."
   sensitive = true
 }

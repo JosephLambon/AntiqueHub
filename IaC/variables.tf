@@ -18,7 +18,7 @@ variable "app_name" {
 variable "app_service_sku_tier" {
   description = "The SKU tier for the App Service Plan (e.g., Basic, Standard, Premium)."
   type        = string
-  default     = "B1"
+  default     = "F1"
 }
 
 variable "db_sku_name" {
