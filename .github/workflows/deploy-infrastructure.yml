@@ -25,7 +25,7 @@ permissions:
 
 env:
   TF_LOG: INFO
-  TF_WORKING_DIR: 'AntiqueHub/IaC'
+  TF_WORKING_DIR: 'IaC'
   # Secrets must be set in GitHub Actions Secrets
   ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
   ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
