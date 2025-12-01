@@ -21,10 +21,10 @@ resource "azurerm_postgresql_flexible_server" "postgres" {
   public_network_access_enabled = true
 }
 
-# Output the DB connection string for the PROD environment for reference
-output "prod_db_connection_string" {
-  value = var.create_database && count(azurerm_postgresql_flexible_server.postgres) > 0 ? 
-      "Host=${azurerm_postgresql_flexible_server.postgres[0].fqdn};Username=psqladmin@${azurerm_postgresql_flexible_server.postgres[0].name};Password=${var.db_password};Database=postgres" : 
-      "Database deployment skipped or connection string not available."
-  sensitive = true
-}
+# Output the DB connection string for the PROD environment for reference in next steps
+# output "prod_db_connection_string" {
+#   value = var.create_database && count(azurerm_postgresql_flexible_server.postgres) > 0 ? 
+#       "Host=${azurerm_postgresql_flexible_server.postgres[0].fqdn};Username=psqladmin@${azurerm_postgresql_flexible_server.postgres[0].name};Password=${var.db_password};Database=postgres" : 
+#       "Database deployment skipped or connection string not available."
+#   sensitive = true
+# }
