@@ -52,9 +52,6 @@ resource "azurerm_linux_web_app" "app_service" {
   app_settings = {
     # Set the App Insights connection string for monitoring
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
-    # The VITE_ANTIQUE_API_BASE_URL will be set by the CI/CD pipeline or manually
-    # We define it here to show it's expected.
-    "VITE_ANTIQUE_API_BASE_URL" = "https://${azurerm_linux_web_app.app_service.default_hostname}/"
   }
 }
 
