@@ -40,11 +40,11 @@ resource "azurerm_linux_web_app" "app_service" {
   enabled             = true
 
   site_config {
-    always_on        = true
+    always_on        = false
     scm_minimum_tls_version = "1.2"
     application_stack {
       # Assuming a Node.js API based on the service file
-      node_version = "20-lts" 
+      dotnet_version = "8.0" 
     }
   }
 
