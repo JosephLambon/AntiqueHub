@@ -56,7 +56,7 @@ jobs:
           enable-AzPSSession: true
             
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: latest
 
@@ -95,7 +95,7 @@ jobs:
           enable-AzPSSession: true  
       
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
 
       - name: Download Plan Artifact
         uses: actions/download-artifact@v3
@@ -133,7 +133,7 @@ jobs:
           enable-AzPSSession: true
             
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
         run: terraform init -backend-config="variables/backend-test.tfvars"
@@ -167,7 +167,7 @@ jobs:
           enable-AzPSSession: true
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
 
       - name: Download Plan Artifact
         uses: actions/download-artifact@v3
@@ -206,7 +206,7 @@ jobs:
           enable-AzPSSession: true
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
         run: terraform init -backend-config="variables/backend-prod.tfvars"
@@ -240,7 +240,7 @@ jobs:
           enable-AzPSSession: true
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
 
       - name: Download Plan Artifact
         uses: actions/download-artifact@v3
