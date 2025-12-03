@@ -3,7 +3,7 @@
 # Deploy the PostgreSQL Flexible Server ONLY if the environment is 'prod'
 resource "azurerm_postgresql_flexible_server" "postgres" {
   count               = var.environment == "prod" ? 1 : 0
-  name                = "psql-${local.prefix}"
+  name                = "psql-${local.prefix}-${var.environment}"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   version             = "17"
