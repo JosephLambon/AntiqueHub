@@ -32,7 +32,7 @@ public static class BlobStorageExtensions
             var accountName = configuration["BlobStorage:AccountName"];
             var containerName = configuration["BlobStorage:ContainerName"];
             containerClient = new BlobContainerClient(
-                new Uri($"https://{accountName}.blob.core.windows.net/{containerName}"),
+                new Uri($"https://{accountName}{env}.blob.core.windows.net/{containerName}"),
                 new DefaultAzureCredential()
             );
         }
