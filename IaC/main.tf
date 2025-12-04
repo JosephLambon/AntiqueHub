@@ -38,6 +38,11 @@ resource "azurerm_linux_web_app" "app_service" {
   resource_group_name = azurerm_resource_group.rg.name
   service_plan_id     = azurerm_service_plan.asp.id
   enabled             = true
+  
+  identity {
+    type             = "SystemAssigned"
+  }
+  
 
   site_config {
     always_on        = false
