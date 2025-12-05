@@ -17,7 +17,7 @@ public static class DbContextExtensions
         }
         else
         {
-            var conn = Environment.GetEnvironmentVariable("POSTGRESQLCONNSTR_psqlProduction");
+            var conn = Environment.GetEnvironmentVariable($"POSTGRESQLCONNSTR_psql{env.EnvironmentName}");
             services.AddDbContext<AntiqueDbContext>(options =>
             {
                 options.UseNpgsql(conn);
