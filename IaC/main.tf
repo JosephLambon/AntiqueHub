@@ -57,7 +57,7 @@ resource "azurerm_linux_web_app" "app_service" {
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
   }
 
-  connection_string = {
+  connection_string {   
     name                =    "psql${var.environment}"
     type                =    "PostgreSQL"
     value               =    var.postgres_connection_string
