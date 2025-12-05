@@ -30,8 +30,9 @@ env:
   ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
   ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-  # Maps to db_password automatically
+  # DB_PASSWORD maps to db_password automatically
   TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+  TF_VAR_postgres_connection_string: ${{ secrets.PG_CONN_STRING }}
 
 jobs:
   # ===========================================================================
