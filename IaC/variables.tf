@@ -42,3 +42,9 @@ variable "db_password" {
   type        = string
   sensitive   = true
 }
+
+variable "postgres_connection_string" {
+  description = "The connection string for the PostgreSQL database."
+  type        = string
+  sensitive   = true
+}
