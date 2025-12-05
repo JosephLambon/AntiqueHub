@@ -43,19 +43,17 @@ resource "azurerm_linux_web_app" "app_service" {
     type             = "SystemAssigned"
   }
   
-
   site_config {
     always_on        = false
     scm_minimum_tls_version = "1.2"
     application_stack {
-      # Assuming a Node.js API based on the service file
       dotnet_version = "8.0" 
     }
   }
 
   # Application Settings (Environment Variables)
   app_settings = {
-    # Set the App Insights connection string for monitoring
+    "ASPNETCORE_ENVIRONMENT"                = var.environment
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
   }
 }

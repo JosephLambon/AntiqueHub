@@ -8,7 +8,7 @@ public static class DbContextExtensions
 {
     public static IServiceCollection AddDbContext(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment env)
     {
-        if (env.IsDevelopment())
+        if (env.IsDevelopment()) // This checks for 'development', so dev env's ASPNETCORE_ENVIRONMENT = 'dev' won't trigger 
         {
             services.AddDbContext<AntiqueDbContext>(options =>
             {
