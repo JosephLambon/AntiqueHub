@@ -6,6 +6,7 @@ using AntiqueHub.Core.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using AntiqueHub.Core.Constants;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace AntiqueHub.Api.EndpointsHandlers;
 public static class AntiqueHandlers
@@ -109,21 +110,37 @@ public static class AntiqueHandlers
         IAntiqueRepository antiqueRepository,
         IMapper mapper,
         int antiqueId,
-        ILogger<Antique> logger
+        ILogger<Antique> logger,
+        IMemoryCache cache
     )
     {
         logger.LogInformation("GET /antiques/{ID} received.",
             antiqueId
             );
 
-        var antiqueEntity = mapper.Map<AntiqueForResponseDto>(
+        // If found in cache, return cached value
+        if (cache.TryGetValue(antiqueId, out AntiqueForResponseDto? antiqueEntity))
+        {
+            logger.LogInformation($"Retrieved antique {antiqueEntity.Id} from cache.");
+            return TypedResults.Ok<AntiqueForResponseDto>(antiqueEntity);;
+        }
+        
+        antiqueEntity = mapper.Map<AntiqueForResponseDto>(
             await antiqueRepository.GetAntiqueByIdAsync(antiqueId)
         );
-
+        
+        var options = new MemoryCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(20)
+        };
+        
         if (antiqueEntity == null)
             return TypedResults.NotFound<string>(
                 String.Concat("Unable to retrieve antique with ID: ",
                 antiqueId));
+        logger.LogInformation("CACHE MISS: Fetching antique {ID} from database.", antiqueId);
+        cache.Set(antiqueId, antiqueEntity, options);   
+        
         return TypedResults.Ok<AntiqueForResponseDto>(antiqueEntity);
     }
 
