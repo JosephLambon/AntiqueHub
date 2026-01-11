@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace AntiqueHub.Api.IntegrationTests;
 
-public class CustomWebApplicationFactory(PostgreSqlContainerFixture sharedFixture) : WebApplicationFactory<Program>
+public class CustomWebApplicationFactory(PostgreSqlContainerFixture sharedFixture, AzuriteContainerFixture azuriteFixture) : WebApplicationFactory<Program>
 {
     public PostgreSqlContainerFixture SharedFixture => sharedFixture; 
 
@@ -21,6 +21,10 @@ public class CustomWebApplicationFactory(PostgreSqlContainerFixture sharedFixtur
         
             services.AddDbContext<AntiqueDbContext>(opts =>
                 opts.UseNpgsql(sharedFixture.DatabaseConnectionString));
+
         });
+        
+        builder.UseSetting("BlobStorage:Host", azuriteFixture.Host);
+        builder.UseSetting("BlobStorage:Port", azuriteFixture.Port.ToString());
     }
 }

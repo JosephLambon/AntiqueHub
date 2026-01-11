@@ -6,14 +6,16 @@ using AntiqueHub.Core.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using AntiqueHub.Core.Constants;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace AntiqueHub.Api.EndpointsHandlers;
 public static class AntiqueHandlers
 {
-    public static async Task<Ok<IEnumerable<AntiqueForResponseDto>>> GetAntiquesAsync(
+    public static async Task<Results<Ok<IEnumerable<AntiqueForResponseDto>>, InternalServerError<string>>> GetAntiquesAsync(
         IAntiqueRepository antiqueRepository,
         IMapper mapper,
         ILogger<Antique> logger,
+        IMemoryCache cache,
         [FromQuery] bool includeAvailable = true,
         [FromQuery] bool includeSold = false,
         [FromQuery] bool includeArchived = false
@@ -22,7 +24,14 @@ public static class AntiqueHandlers
             includeAvailable,
             includeSold,
             includeArchived);
-
+        
+        // If found in cache, return cached value
+        if (cache.TryGetValue((includeAvailable,includeSold, includeArchived), out IEnumerable<AntiqueForResponseDto>? antiques))
+        {
+            logger.LogInformation($"Retrieved antiques from cache.");
+            return TypedResults.Ok<IEnumerable<AntiqueForResponseDto>>(antiques);
+        }
+        
         var includedStatuses = new List<Status>();
         if(includeAvailable)
             includedStatuses.Add(Status.Available);
@@ -32,6 +41,26 @@ public static class AntiqueHandlers
             includedStatuses.Add(Status.Archived);
             
         logger.LogInformation("Getting antiques...");
+        try
+        {
+            
+            antiques = mapper.Map<IEnumerable<AntiqueForResponseDto>>(
+                await antiqueRepository.GetAntiquesAsync(includedStatuses)
+            );
+            
+            var options = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(20)
+            };
+            cache.Set(((includeAvailable, includeSold, includeArchived)), antiques, options);   
+        }
+        catch (Exception ex)
+        {
+            logger.LogInformation("Error retrieving antiques");
+            logger.LogError(ex.Message);
+            return TypedResults.InternalServerError(ex.Message);
+        }
+
         return TypedResults.Ok(
             mapper.Map<IEnumerable<AntiqueForResponseDto>>(
                 await antiqueRepository.GetAntiquesAsync(includedStatuses)
@@ -39,7 +68,7 @@ public static class AntiqueHandlers
         );
     }
     
-    public static async Task<Results<CreatedAtRoute<AntiqueForResponseDto>,BadRequest<string>, UnprocessableEntity<string>,StatusCodeHttpResult>> CreateAntiqueAsync(
+    public static async Task<Results<CreatedAtRoute<AntiqueForResponseDto>,BadRequest<string>, UnprocessableEntity<string>,InternalServerError<string>>> CreateAntiqueAsync(
         IAntiqueRepository antiqueRepository,
         IMapper mapper,
         [FromForm] AntiqueForCreationDto antiqueToCreate,
@@ -99,9 +128,7 @@ public static class AntiqueHandlers
         catch (Exception ex)
         {
             logger.LogError(ex.Message);
-            // .NET 9.0 introduces TypedResults.InternalServerError (could return ex.Message)
-            // ^ Scope for future improvement
-            return TypedResults.StatusCode(500);
+            return TypedResults.InternalServerError(ex.Message);
         }
     }
 
@@ -109,21 +136,37 @@ public static class AntiqueHandlers
         IAntiqueRepository antiqueRepository,
         IMapper mapper,
         int antiqueId,
-        ILogger<Antique> logger
+        ILogger<Antique> logger,
+        IMemoryCache cache
     )
     {
         logger.LogInformation("GET /antiques/{ID} received.",
             antiqueId
             );
 
-        var antiqueEntity = mapper.Map<AntiqueForResponseDto>(
+        // If found in cache, return cached value
+        if (cache.TryGetValue(antiqueId, out AntiqueForResponseDto? antiqueEntity))
+        {
+            logger.LogInformation($"Retrieved antique {antiqueEntity.Id} from cache.");
+            return TypedResults.Ok<AntiqueForResponseDto>(antiqueEntity);;
+        }
+        
+        antiqueEntity = mapper.Map<AntiqueForResponseDto>(
             await antiqueRepository.GetAntiqueByIdAsync(antiqueId)
         );
-
+        
+        var options = new MemoryCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
+        };
+        
         if (antiqueEntity == null)
             return TypedResults.NotFound<string>(
                 String.Concat("Unable to retrieve antique with ID: ",
                 antiqueId));
+        
+        cache.Set(antiqueId, antiqueEntity, options);   
+        
         return TypedResults.Ok<AntiqueForResponseDto>(antiqueEntity);
     }
 

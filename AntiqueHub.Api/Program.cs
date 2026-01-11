@@ -1,6 +1,7 @@
 using AntiqueHub.Core.Models;
 using AntiqueHub.Api.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // app.UseAuth() lines go before anti forgery
+app.Services.GetRequiredService<IMemoryCache>();
 
 app.UseAntiforgery();
 app.RegisterAntiqueEndpoints();

@@ -43,6 +43,9 @@ public static class ServiceExtensions
             options.FormFieldName = "AFFormField";
             options.HeaderName = "X-CSRF-TOKEN"; 
         });
+
+        services.AddMemoryCache();
+        
         return services;
     }
 }
