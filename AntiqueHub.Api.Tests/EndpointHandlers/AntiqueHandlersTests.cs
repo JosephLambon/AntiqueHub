@@ -10,31 +10,35 @@ using Moq;
 using AntiqueHub.Api.EndpointsHandlers;
 using AntiqueHub.Api.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace AntiqueHub.Api.Tests.EndpointHandlers
 {
     public class GetAntiquesAsyncTests
     {
-        private readonly ILoggerFactory mockLoggerFactory;
-        private readonly IMapper mockMapper;
+        private readonly ILoggerFactory loggerFactory;
+        private readonly IMapper mapper;
         private readonly Mock<ILogger<Antique>> mockLogger;
         private readonly Mock<IFileService> mockFileService;
+        private readonly IMemoryCache cache;
 
         public GetAntiquesAsyncTests()
         {
-            mockLoggerFactory = NullLoggerFactory.Instance;
+            loggerFactory = NullLoggerFactory.Instance;
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile(new AntiqueProfile());
-            }, mockLoggerFactory);
-            mockMapper = config.CreateMapper();
+            }, loggerFactory);
+            mapper = config.CreateMapper();
             mockLogger = new Mock<ILogger<Antique>>();
             mockFileService = new Mock<IFileService>();
             
             mockFileService
                 .Setup(s => s.UploadFileAsync(It.IsAny<IFormFile>(), It.IsAny<string[]>()))
                 .ReturnsAsync("mocked-image.png");
+            
+            cache = new MemoryCache(new MemoryCacheOptions());
         }
 
         [Fact]
@@ -42,16 +46,17 @@ namespace AntiqueHub.Api.Tests.EndpointHandlers
         {
             // Arrange
             var mockRepo = AntiqueRepositoryMock.GetAntiqueRepository();
-        
+            
             // Act
             var result = await AntiqueHandlers.GetAntiquesAsync(
                 mockRepo.Object,
-                mockMapper,
+                mapper,
                 mockLogger.Object,
+                cache,
                 includeAvailable: true, includeSold: false, includeArchived: false);
         
             // Assert
-            var okResult = Assert.IsType<Ok<IEnumerable<AntiqueForResponseDto>>>(result);
+            var okResult = Assert.IsType<Ok<IEnumerable<AntiqueForResponseDto>>>(result.Result);
             var antiques = okResult.Value.ToList();
         
             Assert.NotEmpty(antiques);
@@ -67,12 +72,13 @@ namespace AntiqueHub.Api.Tests.EndpointHandlers
             // Act
             var result = await AntiqueHandlers.GetAntiquesAsync(
                 mockRepo.Object,
-                mockMapper,
+                mapper,
                 mockLogger.Object,
+                cache,
                 includeAvailable: false, includeSold: true, includeArchived: false);
         
             // Assert
-            var okResult = Assert.IsType<Ok<IEnumerable<AntiqueForResponseDto>>>(result);
+            var okResult = Assert.IsType<Ok<IEnumerable<AntiqueForResponseDto>>>(result.Result);
             var antiques = okResult.Value.ToList();
         
             Assert.Single(antiques); // only 1 mock antique is Sold
@@ -88,12 +94,13 @@ namespace AntiqueHub.Api.Tests.EndpointHandlers
             // Act
             var result = await AntiqueHandlers.GetAntiquesAsync(
                 mockRepo.Object,
-                mockMapper,
+                mapper,
                 mockLogger.Object,
+                cache,
                 includeAvailable: true, includeSold: true, includeArchived: true);
         
             // Assert
-            var okResult = Assert.IsType<Ok<IEnumerable<AntiqueForResponseDto>>>(result);
+            var okResult = Assert.IsType<Ok<IEnumerable<AntiqueForResponseDto>>>(result.Result);
             var antiques = okResult.Value.ToList();
         
             Assert.Equal(3, antiques.Count);
@@ -125,9 +132,10 @@ namespace AntiqueHub.Api.Tests.EndpointHandlers
             // Act
             var result = await AntiqueHandlers.GetAntiqueByIdAsync(
                 mockRepo.Object,
-                mockMapper,
+                mapper,
                 1, // existing ID
-                mockLogger.Object);
+                mockLogger.Object,
+                cache);
 
             // Assert
             var okResult = Assert.IsType<Ok<AntiqueForResponseDto>>(result.Result);
@@ -143,9 +151,10 @@ namespace AntiqueHub.Api.Tests.EndpointHandlers
             // Act
             var result = await AntiqueHandlers.GetAntiqueByIdAsync(
                 mockRepo.Object,
-                mockMapper,
+                mapper,
                 999, // non-existent ID
-                mockLogger.Object);
+                mockLogger.Object,
+                cache);
 
             // Assert
             var notFoundResult = Assert.IsType<NotFound<string>>(result.Result);
@@ -182,7 +191,7 @@ namespace AntiqueHub.Api.Tests.EndpointHandlers
             // Act
             var result = await AntiqueHandlers.CreateAntiqueAsync(
                 mockRepo.Object,
-                mockMapper,
+                mapper,
                 dto,
                 mockLogger.Object,
                 mockFileService.Object
@@ -213,7 +222,7 @@ namespace AntiqueHub.Api.Tests.EndpointHandlers
             // Act
             var result = await AntiqueHandlers.CreateAntiqueAsync(
                 mockRepo.Object,
-                mockMapper,
+                mapper,
                 dto,
                 mockLogger.Object,
                 mockFileService.Object
@@ -244,7 +253,7 @@ namespace AntiqueHub.Api.Tests.EndpointHandlers
             // Act
             var result = await AntiqueHandlers.CreateAntiqueAsync(
                 mockRepo.Object,
-                mockMapper,
+                mapper,
                 dto,
                 mockLogger.Object,
                 mockFileService.Object
@@ -276,15 +285,15 @@ namespace AntiqueHub.Api.Tests.EndpointHandlers
             // Act
             var result = await AntiqueHandlers.CreateAntiqueAsync(
                 mockRepo.Object,
-                mockMapper,
+                mapper,
                 dto,
                 mockLogger.Object,
                 mockFileService.Object
             );
 
             // Assert
-            Assert.IsType<StatusCodeHttpResult>(result.Result);
-            Assert.Equal(500, ((StatusCodeHttpResult)result.Result).StatusCode);
+            Assert.IsType<InternalServerError<string>>(result.Result);
+            Assert.Equal(500, ((InternalServerError<string>)result.Result).StatusCode);
         }
         
         [Fact]
@@ -319,7 +328,7 @@ namespace AntiqueHub.Api.Tests.EndpointHandlers
             // Act
             var result = await AntiqueHandlers.UpdateAntiqueAsync(
                 mockRepo.Object,
-                mockMapper,
+                mapper,
                 antiqueId,
                 updatedDto,
                 mockLogger.Object
@@ -342,7 +351,7 @@ namespace AntiqueHub.Api.Tests.EndpointHandlers
             // Act
             var result = await AntiqueHandlers.UpdateAntiqueAsync(
                 mockRepo.Object,
-                mockMapper,
+                mapper,
                 antiqueId,
                 updatedDto,
                 mockLogger.Object
@@ -367,7 +376,7 @@ namespace AntiqueHub.Api.Tests.EndpointHandlers
             // Act
             var result = await AntiqueHandlers.UpdateAntiqueAsync(
                 mockRepo.Object,
-                mockMapper,
+                mapper,
                 antiqueId,
                 updatedDto,
                 mockLogger.Object
