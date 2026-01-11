@@ -23,8 +23,9 @@ public static class BlobStorageExtensions
             );
 
             var blobHost = configuration["BlobStorage:Host"];
+            var blobPort = configuration["BlobStorage:Port"];
             var containerName = configuration["BlobStorage:ContainerName"];
-            var localUri = new Uri($"http://{blobHost}:10000/devstoreaccount1/{containerName}");
+            var localUri = new Uri($"http://{blobHost}:{blobPort}/devstoreaccount1/{containerName}");
             containerClient = new BlobContainerClient(localUri, credential);
         }
         else

@@ -9,4 +9,4 @@ using AntiqueHub.Core.Models;
 namespace AntiqueHub.Api.IntegrationTests;
 
 [CollectionDefinition(nameof(IntegrationTestsCollection))]
-public class IntegrationTestsCollection : ICollectionFixture<PostgreSqlContainerFixture> { }
+public class IntegrationTestsCollection : ICollectionFixture<PostgreSqlContainerFixture>, ICollectionFixture<AzuriteContainerFixture> { }
